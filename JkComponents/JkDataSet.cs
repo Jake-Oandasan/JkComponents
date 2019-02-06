@@ -56,15 +56,15 @@ namespace JkComponents
         [Category("(Custom)")]
         public JkConnection Connection { get; set; }
 
-        public delegate void BeforeOpenHandler();
+        public delegate void BeforeOpenHandler(object sender);
         public event BeforeOpenHandler BeforeOpen;
         protected virtual void OnBeforeOpen()
         {
             if (BeforeOpen != null)
-                BeforeOpen();
+                BeforeOpen(this);
         }
 
-        private DataTable DataTable = new DataTable();
+        public DataTable DataTable = new DataTable();
 
         public JkDataSet()
         {
@@ -147,6 +147,10 @@ namespace JkComponents
                             {
                                 DataAdapter.SelectCommand.Parameters.AddWithValue("@" + Parameters[i].Name, 0);
                             }
+                            else
+                            {
+                                DataAdapter.SelectCommand.Parameters.AddWithValue("@" + Parameters[i].Name, Parameters[i].Value);   
+                            }
                         }
                     }
 
@@ -173,12 +177,7 @@ namespace JkComponents
 
         public JkDataSetParameter ParamByName(String ParameterName)
         {
-            JkDataSetParameter param = Parameters.Find(p => p.Name == ParameterName);
-
-            if (param == null)
-                throw new Exception("Object Name: " + this.Name + "\rError: No parameter found named: " + ParameterName);
-            else
-                return param;
+            return Parameters.Find(p => p.Name == ParameterName);
         }
 
         public int RecordCount()
@@ -213,6 +212,22 @@ namespace JkComponents
             }
 
             return DataTable.Select(filtering)[0][ResultField];
+        }
+    }
+
+    public static class JkDataSets
+    {
+        public static List<JkDataSet> List = new List<JkDataSet>();
+
+        public static void Add(JkDataSet item)
+        {
+            if (List.Find(l => l.Name == item.Name) == null)
+                List.Add(item);
+        }
+
+        public static JkDataSet FindByName(String name)
+        { 
+            return List.Find(l => l.Name == name);
         }
     }
 }

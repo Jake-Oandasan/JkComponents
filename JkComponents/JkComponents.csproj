@@ -47,23 +47,38 @@
     </Compile>
     <Compile Include="JkDataSetColumn.cs" />
     <Compile Include="JkFormParameter.cs" />
+    <Compile Include="JkListPropertyEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="JkListPropertyEditorForm.Designer.cs">
+      <DependentUpon>JkListPropertyEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="JkLookUpComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="JkLookUpProvider.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="JkMasterColumn.cs" />
     <Compile Include="JkDataSet.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="JkDataSetParameter.cs" />
-    <Compile Include="JkTextPropertyEditor.cs">
+    <Compile Include="JkTextPropertyEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JkTextPropertyEditor.Designer.cs">
-      <DependentUpon>JkTextPropertyEditor.cs</DependentUpon>
+    <Compile Include="JkTextPropertyEditorForm.Designer.cs">
+      <DependentUpon>JkTextPropertyEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="JkTextPropertyEditor.resx">
-      <DependentUpon>JkTextPropertyEditor.cs</DependentUpon>
+    <EmbeddedResource Include="JkListPropertyEditorForm.resx">
+      <DependentUpon>JkListPropertyEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JkTextPropertyEditorForm.resx">
+      <DependentUpon>JkTextPropertyEditorForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
