@@ -64,6 +64,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="JkDataSetParameter.cs" />
+    <Compile Include="JkTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="JkTextPropertyEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +79,9 @@
   <ItemGroup>
     <EmbeddedResource Include="JkListPropertyEditorForm.resx">
       <DependentUpon>JkListPropertyEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JkTextBox.resx">
+      <DependentUpon>JkTextBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="JkTextPropertyEditorForm.resx">
       <DependentUpon>JkTextPropertyEditorForm.cs</DependentUpon>
