@@ -64,6 +64,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="JkDataSetParameter.cs" />
+    <Compile Include="JkSeriesProvider.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="JkTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
