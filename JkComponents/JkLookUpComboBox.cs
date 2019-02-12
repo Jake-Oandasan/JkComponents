@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Data;
 using System.ComponentModel;
 using System.Drawing.Design;
+using System.Drawing;
 
 namespace JkComponents
 {
@@ -15,10 +16,13 @@ namespace JkComponents
         [Category("(Custom)")]
         [Editor(typeof(JkListPropertyTypeEditor), typeof(UITypeEditor))]
         public String DataSet { get; set; }
+
         [Category("(Custom)")]
         public string Key { get; set; }
+
         [Category("(Custom)")]
         public string DisplayText { get; set; }
+
         [Browsable(false)]
         public int SelectedKey
         {
@@ -38,6 +42,20 @@ namespace JkComponents
                 }
             }
         }
+
+        [Category("(Custom)")]
+        public bool Required
+        {
+            get { return _Required; }
+            set
+            {
+                _Required = value;
+            }
+        }
+
+        private Panel WaterMarkHandler = new Panel();
+        private bool _Required;
+        private String WatermarkText = "Required";
 
         public JkLookUpComboBox()
         {

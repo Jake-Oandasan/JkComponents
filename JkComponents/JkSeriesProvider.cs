@@ -75,6 +75,7 @@ namespace JkComponents
             {
                 DataAdapter.SelectCommand.Parameters.AddWithValue("@CompanyId", Convert.ToInt32(CompanyId));
                 DataAdapter.SelectCommand.Parameters.AddWithValue("@Code", Code);
+                DataTable.Clear();
                 DataAdapter.Fill(DataTable);
                 Value = DataTable.Rows[0]["TransactionNo"].ToString();
             }
