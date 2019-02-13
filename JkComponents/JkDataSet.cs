@@ -190,7 +190,21 @@ namespace JkComponents
             if (!Active)
                 Open();
 
-            return DataTable.Select(KeyField + "=" + KeyValue)[0][ResultField];
+            if (!DataTable.Columns.Contains(KeyField))
+                return null;
+
+            if (!DataTable.Columns.Contains(ResultField))
+                return null;
+
+            foreach (DataRow row in DataTable.Rows)
+            {
+                if (row[KeyField].ToString() == KeyValue.ToString())
+                {
+                    return row[ResultField];
+                }
+            }
+
+            return null;
         }
 
         public Object Lookup(String[] KeyField, Object[] KeyValue, String ResultField)
