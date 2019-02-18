@@ -55,7 +55,6 @@ namespace JkComponents
 
         private Panel WaterMarkHandler = new Panel();
         private bool _Required;
-        private String WatermarkText = "Required";
 
         public JkLookUpComboBox()
         {

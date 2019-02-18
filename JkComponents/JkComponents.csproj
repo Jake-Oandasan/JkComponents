@@ -45,8 +45,14 @@
     <Compile Include="JkConnection.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="JkDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="JkDataSetColumn.cs" />
     <Compile Include="JkDetailColumn.cs" />
+    <Compile Include="JkDetailDataSet.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="JkFormParameter.cs" />
     <Compile Include="JkListPropertyEditorForm.cs">
       <SubType>Form</SubType>
@@ -81,6 +87,9 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="JkDataGridView.resx">
+      <DependentUpon>JkDataGridView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="JkListPropertyEditorForm.resx">
       <DependentUpon>JkListPropertyEditorForm.cs</DependentUpon>
     </EmbeddedResource>
