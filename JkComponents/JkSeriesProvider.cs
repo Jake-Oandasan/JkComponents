@@ -29,7 +29,7 @@ namespace JkComponents
         public String TransactionColumn { get; set; }
 
         [Browsable(false)]
-        private String SelectCommandText = "SELECT Code + '-' + RIGHT('0000000' + CAST(NextNumber AS VARCHAR), 8) AS TransactionNo FROM tblSystemSeries WHERE CompanyId = @CompanyId AND Code = @Code";
+        private String SelectCommandText = "SELECT NextSeries AS TransactionNo FROM tblSystemSeries WHERE CompanyId = @CompanyId AND Code = @Code";
 
         [Browsable(false)]
         private String UpdateCommandText = "UPDATE tblSystemSeries SET NextNumber = NextNumber + 1 WHERE CompanyId = @CompanyId AND Code = @Code";

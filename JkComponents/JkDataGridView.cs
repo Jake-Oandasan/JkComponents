@@ -15,8 +15,22 @@ namespace JkComponents
         private Panel GridParent = new Panel();
         private FlowLayoutPanel GridFooter = new FlowLayoutPanel();
 
+        private JkDetailDataSet _DataSet;
         [Browsable(false)]
-        public JkDetailDataSet DataSet { get; set; }
+        public JkDetailDataSet DataSet
+        {
+            get { return _DataSet; }
+            set
+            {
+                _DataSet = value;
+
+                if (value != null)
+                {
+                    this.AutoGenerateColumns = false;
+                    this.DataSource = value.DataTable;
+                }
+            }
+        }
 
         public JkDataGridView()
         {
@@ -33,6 +47,9 @@ namespace JkComponents
             // JkDataGridView
             // 
             this.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEndEdit);
+            this.ColumnWidthChanged += new System.Windows.Forms.DataGridViewColumnEventHandler(this.JkDataGridView_ColumnWidthChanged);
+            this.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.JkDataGridView_DataError);
+            this.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.JkDataGridView_EditingControlShowing);
             this.ParentChanged += new System.EventHandler(this.JkDataGridView_ParentChanged);
             ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
             this.ResumeLayout(false);
@@ -44,7 +61,7 @@ namespace JkComponents
             //change the parent of grid on runtime
             if (!DesignMode && this.Parent != null && this.Parent != GridParent)
             {
-                GridFooter.BackColor = Color.Silver;
+                GridFooter.BackColor = Color.Ivory;
                 GridFooter.BorderStyle = BorderStyle.Fixed3D;
                 GridFooter.WrapContents = false;
 
@@ -120,18 +137,50 @@ namespace JkComponents
             {
                 if (ic.Visible && ic.FooterType != JkDetailColumn.ColumnFooterTypes.ftNone)
                 {
-                    if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
-                        value = DataSet.DataTable.Rows.Count.ToString();
-                    //todo: other footer types
-
-                    if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftSum)
+                    if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftAvg)
                     {
                         double total = 0;
 
                         foreach (DataRow row in DataSet.DataTable.Rows)
-                        {
                             total += Convert.ToDouble(row[ic.Name]);
-                        }
+
+                        total = total / DataSet.DataTable.Rows.Count;
+                        value = total.ToString("N2");
+                    }
+                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
+                        value = DataSet.DataTable.Rows.Count.ToString();
+                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMax)
+                    {
+                        double max = 0;
+
+                        foreach (DataRow row in DataSet.DataTable.Rows)
+                            if (Double.Parse(row[ic.Name].ToString()) > max)
+                                max = Double.Parse(row[ic.Name].ToString());
+
+                        if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
+                            value = max.ToString();
+                        else
+                            value = max.ToString("N2");
+                    }
+                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMin)
+                    {
+                        double min = 2147483647;
+
+                        foreach (DataRow row in DataSet.DataTable.Rows)
+                            if (Double.Parse(row[ic.Name].ToString()) < min)
+                                min = Double.Parse(row[ic.Name].ToString());
+
+                        if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
+                            value = min.ToString();
+                        else
+                            value = min.ToString("N2");
+                    }
+                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftSum)
+                    {
+                        double total = 0;
+
+                        foreach (DataRow row in DataSet.DataTable.Rows)
+                            total += Convert.ToDouble(row[ic.Name]);
 
                         value = total.ToString("N2");
                     }
@@ -139,9 +188,7 @@ namespace JkComponents
                     foreach (Control c in GridFooter.Controls)
                     {
                         if (c.Name == "lblFooter" + ic.Caption.Trim())
-                        {
                             c.Text = AssignFooterValue(ic.FooterType, value);
-                        }
                     }
                 }
             }
@@ -183,6 +230,31 @@ namespace JkComponents
         private void JkDataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             ComputeFooterValues();
+        }
+
+        private void JkDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            //to remove error generated by .Net when assigning a value at a ComboBox
+        }
+
+        private void JkDataGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (this.AllowUserToAddRows && e.Control != null && e.Control is ComboBox)
+            {
+                (e.Control as ComboBox).IntegralHeight = false;
+                (e.Control as ComboBox).MaxDropDownItems = 10;
+            }
+        }
+
+        private void JkDataGridView_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)
+        {
+            foreach (Control c in GridFooter.Controls)
+            {
+                if (c.Name == "lblFooter" + e.Column.HeaderText.Trim())
+                {
+                    c.Width = e.Column.Width;
+                }
+            }
         }
     }
 }

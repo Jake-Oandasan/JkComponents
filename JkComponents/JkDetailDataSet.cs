@@ -102,23 +102,8 @@ namespace JkComponents
             }
         }
 
-        private JkDataGridView _GridView;
         [Category("(Custom)")]
-        public JkDataGridView GridView
-        {
-            get { return _GridView; }
-            set
-            {
-                _GridView = value;
-
-                if (value != null)
-                {
-                    GridView.AutoGenerateColumns = false;
-                    GridView.DataSource = DataTable;
-                    GridView.DataSet = this;
-                }
-            }
-        }
+        public JkDataGridView GridView { get; set; }
 
         [Category("(Custom)")]
         public String ConnectionString { get; set; }
@@ -128,6 +113,7 @@ namespace JkComponents
 
         public JkDetailDataSet()
         {
+            InitializeComponent();
             this.BackColor = Color.Tan;
             this.Visible = false;
         }
@@ -219,71 +205,68 @@ namespace JkComponents
             {
                 col = Columns[i];
 
-                if (col.Name != "Id")
+                DataGridViewTextBoxColumn GridColText = new DataGridViewTextBoxColumn();
+                DataGridViewCheckBoxColumn GridColCheck = new DataGridViewCheckBoxColumn();
+                DataGridViewComboBoxColumn GridColCombo = new DataGridViewComboBoxColumn();
+                DataGridViewTextBoxColumn GridColDate = new DataGridViewTextBoxColumn();
+
+                if (col.DataType == SqlDbType.Bit)
                 {
-                    DataGridViewTextBoxColumn GridColText = new DataGridViewTextBoxColumn();
-                    DataGridViewCheckBoxColumn GridColCheck = new DataGridViewCheckBoxColumn();
-                    DataGridViewComboBoxColumn GridColCombo = new DataGridViewComboBoxColumn();
-                    DataGridViewTextBoxColumn GridColDate = new DataGridViewTextBoxColumn();
+                    GridColCheck.Name = "dataGridViewColumn" + col.Name.Trim();
+                    GridColCheck.HeaderText = col.Caption;
+                    GridColCheck.Width = col.Width;
+                    GridColCheck.Visible = col.Visible;
+                    GridColCheck.DataPropertyName = col.Name;
 
-                    if (col.DataType == SqlDbType.Bit)
+                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCheck });
+                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColCheck.Name) == null)
+                        _GridColumn.Add(GridColCheck);
+                }
+                else if (col.DataType == SqlDbType.DateTime)
+                {
+                    GridColDate.Name = "dataGridViewColumn" + col.Name.Trim();
+                    GridColDate.HeaderText = col.Caption;
+                    GridColDate.Width = col.Width;
+                    GridColDate.Visible = col.Visible;
+                    GridColDate.DataPropertyName = col.Name;
+                    GridColDate.DefaultCellStyle.Format = "MM'/'dd'/'yyyy";
+
+                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColDate });
+                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColDate.Name) == null)
+                        _GridColumn.Add(GridColDate);
+                }
+                else if (!String.IsNullOrWhiteSpace(col.ControlName))
+                {
+                    GridColCombo.Name = "dataGridViewColumn" + col.Name.Trim();
+                    GridColCombo.HeaderText = col.Caption;
+                    GridColCombo.Width = col.Width;
+                    GridColCombo.Visible = col.Visible;
+                    GridColCombo.DataPropertyName = col.Name;
+                    GridColCombo.DisplayStyle = DataGridViewComboBoxDisplayStyle.ComboBox;
+                    GridColCombo.DropDownWidth = 200;
+
+                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCombo });
+                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColCombo.Name) == null)
+                        _GridColumn.Add(GridColCombo);
+                }
+                else
+                {
+                    GridColText.Name = "dataGridViewColumn" + col.Name.Trim();
+                    GridColText.HeaderText = col.Caption;
+                    GridColText.Width = col.Width;
+                    GridColText.Visible = col.Visible;
+                    GridColText.DataPropertyName = col.Name;
+
+                    if (col.DataType == SqlDbType.Money || col.DataType == SqlDbType.Float || col.DataType == SqlDbType.Decimal)
                     {
-                        GridColCheck.Name = "dataGridViewColumn" + col.Name.Trim();
-                        GridColCheck.HeaderText = col.Caption;
-                        GridColCheck.Width = col.Width;
-                        GridColCheck.Visible = col.Visible;
-                        GridColCheck.DataPropertyName = col.Name;
-
-                        GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCheck });
-                        if (_GridColumn.Find(gridCol => gridCol.Name == GridColCheck.Name) == null)
-                            _GridColumn.Add(GridColCheck);
+                        GridColText.DefaultCellStyle.Format = "N2";
+                        GridColText.ValueType = Type.GetType("System.Decimal");
+                        GridColText.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     }
-                    else if (col.DataType == SqlDbType.DateTime)
-                    {
-                        GridColDate.Name = "dataGridViewColumn" + col.Name.Trim();
-                        GridColDate.HeaderText = col.Caption;
-                        GridColDate.Width = col.Width;
-                        GridColDate.Visible = col.Visible;
-                        GridColDate.DataPropertyName = col.Name;
-                        GridColDate.DefaultCellStyle.Format = "MM'/'dd'/'yyyy";
 
-                        GridView.Columns.AddRange(new DataGridViewColumn[] { GridColDate });
-                        if (_GridColumn.Find(gridCol => gridCol.Name == GridColDate.Name) == null)
-                            _GridColumn.Add(GridColDate);
-                    }
-                    else if (!String.IsNullOrWhiteSpace(col.ControlName))
-                    {
-                        GridColCombo.Name = "dataGridViewColumn" + col.Name.Trim();
-                        GridColCombo.HeaderText = col.Caption;
-                        GridColCombo.Width = col.Width;
-                        GridColCombo.Visible = col.Visible;
-                        GridColCombo.DataPropertyName = col.Name;
-                        GridColCombo.DisplayStyle = DataGridViewComboBoxDisplayStyle.ComboBox;
-                        GridColCombo.DropDownWidth = 200;
-
-                        GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCombo });
-                        if (_GridColumn.Find(gridCol => gridCol.Name == GridColCombo.Name) == null)
-                            _GridColumn.Add(GridColCombo);
-                    }
-                    else
-                    {
-                        GridColText.Name = "dataGridViewColumn" + col.Name.Trim();
-                        GridColText.HeaderText = col.Caption;
-                        GridColText.Width = col.Width;
-                        GridColText.Visible = col.Visible;
-                        GridColText.DataPropertyName = col.Name;
-
-                        if (col.DataType == SqlDbType.Money || col.DataType == SqlDbType.Float || col.DataType == SqlDbType.Decimal)
-                        {
-                            GridColText.DefaultCellStyle.Format = "N2";
-                            GridColText.ValueType = Type.GetType("System.Decimal");
-                            GridColText.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        }
-
-                        GridView.Columns.AddRange(new DataGridViewColumn[] { GridColText });
-                        if (_GridColumn.Find(gridCol => gridCol.Name == GridColText.Name) == null)
-                            _GridColumn.Add(GridColText);
-                    }
+                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColText });
+                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColText.Name) == null)
+                        _GridColumn.Add(GridColText);
                 }
             }
             UpdateGridSize(GridAutoSize);
@@ -304,6 +287,17 @@ namespace JkComponents
                     }
             }
             GridView.Update();
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // JkDetailDataSet
+            // 
+            this.Name = "JkDetailDataSet";
+            this.ResumeLayout(false);
+
         }
     }
 }

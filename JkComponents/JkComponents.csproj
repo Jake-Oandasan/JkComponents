@@ -90,6 +90,9 @@
     <EmbeddedResource Include="JkDataGridView.resx">
       <DependentUpon>JkDataGridView.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="JkDetailDataSet.resx">
+      <DependentUpon>JkDetailDataSet.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="JkListPropertyEditorForm.resx">
       <DependentUpon>JkListPropertyEditorForm.cs</DependentUpon>
     </EmbeddedResource>
