@@ -50,6 +50,7 @@ namespace JkComponents
             this.ColumnWidthChanged += new System.Windows.Forms.DataGridViewColumnEventHandler(this.JkDataGridView_ColumnWidthChanged);
             this.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.JkDataGridView_DataError);
             this.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.JkDataGridView_EditingControlShowing);
+            this.Scroll += new System.Windows.Forms.ScrollEventHandler(this.JkDataGridView_Scroll);
             this.ParentChanged += new System.EventHandler(this.JkDataGridView_ParentChanged);
             ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
             this.ResumeLayout(false);
@@ -64,6 +65,8 @@ namespace JkComponents
                 GridFooter.BackColor = Color.Ivory;
                 GridFooter.BorderStyle = BorderStyle.Fixed3D;
                 GridFooter.WrapContents = false;
+                //remove auto scrolling feature of the panel
+                GridFooter.AutoScroll = false;
 
                 this.Parent.Controls.Add(GridParent);
                 this.Parent.Controls.Remove(this);
@@ -90,19 +93,35 @@ namespace JkComponents
 
         public void CreateFooter()
         {
-            JkDetailColumn ic;
-            int EstimatedWidth = 0, offset = 35;
+            JkDetailColumn ic = null;
+            int EstimatedWidth = 0, offset = 35, gridWidth = 0;
 
             if (VisibleColumnCount() != 0)
                 EstimatedWidth = Convert.ToInt32((this.Width) / VisibleColumnCount()) - 18;
 
-            GridFooter.Padding = new Padding(offset, 3, 3, 3);
+            GridFooter.Padding = new Padding(3, 3, 3, 3);
 
             if (DataSet.Columns.Count > 0)
             {
+                Label lblOffset = new Label();
+
+                lblOffset.Name = "lblFooterOffset";
+                lblOffset.Width = offset;
+                lblOffset.Margin = new Padding(0, 0, 0, 0);
+
+                if (GridFooter.Controls.Find(lblOffset.Name, false).Length == 0)
+                    GridFooter.Controls.Add(lblOffset);
+
                 for (int i = 0; i <= DataSet.Columns.Count - 1; i++)
                 {
                     ic = DataSet.Columns[i];
+
+                    foreach (DataGridViewColumn column in this.Columns)
+                    {
+                        if (column.DataPropertyName == ic.Name)
+                            gridWidth = column.Width;
+                    }
+
                     if (ic.Visible)
                     {
                         Label lblFooter = new Label();
@@ -110,17 +129,22 @@ namespace JkComponents
                         lblFooter.TextAlign = ContentAlignment.MiddleCenter;
                         lblFooter.Text = AssignFooterValue(ic.FooterType, "0");
                         lblFooter.Font = new Font(this.Font.Name, this.Font.Size, FontStyle.Bold);
+                        
 
                         if (DataSet.GridAutoSize)
                             lblFooter.Width = EstimatedWidth;
                         else
-                            lblFooter.Width = ic.Width;
-
-                        if (i == 0)
-                            lblFooter.Width -= offset;
+                            lblFooter.Width = gridWidth;
 
                         if (ic.FooterType != JkDetailColumn.ColumnFooterTypes.ftNone)
+                        {
                             lblFooter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+                            lblFooter.Margin = new Padding(2, 0, 0, 0);
+                        }
+                        else
+                        {
+                            lblFooter.Margin = new Padding(0, 0, 0, 0);
+                        }
 
                         if (GridFooter.Controls.Find(lblFooter.Name, false).Length == 0)
                             GridFooter.Controls.Add(lblFooter);
@@ -254,6 +278,22 @@ namespace JkComponents
                 {
                     c.Width = e.Column.Width;
                 }
+            }
+        }
+
+        private void JkDataGridView_Scroll(object sender, ScrollEventArgs e)
+        {
+            HScrollBar hScrollBar = this.Controls.OfType<HScrollBar>().First();
+
+            //GridFooter will scroll depending on scroll of the grid
+            if (hScrollBar.Visible && e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
+            {
+                GridFooter.HorizontalScroll.Maximum = hScrollBar.Maximum;
+                GridFooter.HorizontalScroll.Minimum = hScrollBar.Minimum;
+                GridFooter.HorizontalScroll.LargeChange = hScrollBar.LargeChange;
+                GridFooter.HorizontalScroll.SmallChange = hScrollBar.SmallChange;
+                GridFooter.HorizontalScroll.Value = e.NewValue;
+                GridFooter.Update();
             }
         }
     }

@@ -217,6 +217,10 @@ namespace JkComponents
                     GridColCheck.Width = col.Width;
                     GridColCheck.Visible = col.Visible;
                     GridColCheck.DataPropertyName = col.Name;
+                    GridColCheck.ReadOnly = col.ReadOnly;
+
+                    if (col.ReadOnly)
+                        GridColCheck.DefaultCellStyle.BackColor = Color.LightGray;
 
                     GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCheck });
                     if (_GridColumn.Find(gridCol => gridCol.Name == GridColCheck.Name) == null)
@@ -230,6 +234,10 @@ namespace JkComponents
                     GridColDate.Visible = col.Visible;
                     GridColDate.DataPropertyName = col.Name;
                     GridColDate.DefaultCellStyle.Format = "MM'/'dd'/'yyyy";
+                    GridColDate.ReadOnly = col.ReadOnly;
+
+                    if (col.ReadOnly)
+                        GridColDate.DefaultCellStyle.BackColor = Color.LightGray;
 
                     GridView.Columns.AddRange(new DataGridViewColumn[] { GridColDate });
                     if (_GridColumn.Find(gridCol => gridCol.Name == GridColDate.Name) == null)
@@ -244,6 +252,10 @@ namespace JkComponents
                     GridColCombo.DataPropertyName = col.Name;
                     GridColCombo.DisplayStyle = DataGridViewComboBoxDisplayStyle.ComboBox;
                     GridColCombo.DropDownWidth = 200;
+                    GridColCombo.ReadOnly = col.ReadOnly;
+
+                    if (col.ReadOnly)
+                        GridColCombo.DefaultCellStyle.BackColor = Color.LightGray;
 
                     GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCombo });
                     if (_GridColumn.Find(gridCol => gridCol.Name == GridColCombo.Name) == null)
@@ -256,6 +268,10 @@ namespace JkComponents
                     GridColText.Width = col.Width;
                     GridColText.Visible = col.Visible;
                     GridColText.DataPropertyName = col.Name;
+                    GridColText.ReadOnly = col.ReadOnly;
+
+                    if (col.ReadOnly)
+                        GridColText.DefaultCellStyle.BackColor = Color.LightGray;
 
                     if (col.DataType == SqlDbType.Money || col.DataType == SqlDbType.Float || col.DataType == SqlDbType.Decimal)
                     {

@@ -26,5 +26,6 @@ namespace JkComponents
             get { return _Visible; }
             set { _Visible = value; }
         }
+        public bool ReadOnly { get; set; }
     }
 }

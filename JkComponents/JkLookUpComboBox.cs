@@ -38,7 +38,10 @@ namespace JkComponents
                 foreach(Object item in this.Items)
                 {
                     if ((item as JkLookupItem).Key == value)
+                    {
                         this.SelectedItem = item;
+                        this.Text = (item as JkLookupItem).DisplayText;
+                    }
                 }
             }
         }
