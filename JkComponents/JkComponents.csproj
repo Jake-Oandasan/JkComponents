@@ -54,6 +54,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="JkFormParameter.cs" />
+    <Compile Include="JkGridColumnSerializer.cs" />
     <Compile Include="JkListPropertyEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +84,7 @@
     <Compile Include="JkTextPropertyEditorForm.Designer.cs">
       <DependentUpon>JkTextPropertyEditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="JkTypeConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>

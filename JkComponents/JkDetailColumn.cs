@@ -27,5 +27,6 @@ namespace JkComponents
             set { _Visible = value; }
         }
         public bool ReadOnly { get; set; }
+        public bool Temporary { get; set; }
     }
 }

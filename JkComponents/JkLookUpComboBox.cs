@@ -46,6 +46,9 @@ namespace JkComponents
             }
         }
 
+        private String WatermarkText = "Required";
+        private bool _Required;
+
         [Category("(Custom)")]
         public bool Required
         {
@@ -53,14 +56,18 @@ namespace JkComponents
             set
             {
                 _Required = value;
+
+                if (value)
+                    AddWaterMark();
+                else
+                    RemoveWaterMark();
             }
         }
-
-        private Panel WaterMarkHandler = new Panel();
-        private bool _Required;
+        
 
         public JkLookUpComboBox()
         {
+            InitializeComponent();
         }
 
         public void LoadData()
@@ -103,6 +110,66 @@ namespace JkComponents
                     }
                 }
             }
+        }
+
+        private void AddWaterMark()
+        {
+            if (this.SelectedIndex == -1)
+            {
+                this.ForeColor = Color.Gray;
+                this.Text = WatermarkText;
+            }
+        }
+
+        private void RemoveWaterMark()
+        {
+            if (this.SelectedIndex != -1 || !Required)
+            {
+                if (this.Text == WatermarkText)
+                    this.Text = String.Empty;
+
+                this.ForeColor = Color.Black;
+                this.Update();
+            }
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // JkLookUpComboBox
+            // 
+            this.DropDown += new System.EventHandler(this.JkLookUpComboBox_DropDown);
+            this.Enter += new System.EventHandler(this.JkLookUpComboBox_Enter);
+            this.Leave += new System.EventHandler(this.JkLookUpComboBox_Leave);
+            this.ResumeLayout(false);
+
+        }
+
+        private void JkLookUpComboBox_DropDown(object sender, EventArgs e)
+        {
+            if (this.ForeColor == Color.Gray && this.Text == WatermarkText)
+            {
+                this.ForeColor = Color.Black;
+                this.Text = String.Empty;
+            }
+        }
+
+        private void JkLookUpComboBox_Enter(object sender, EventArgs e)
+        {
+            if (this.ForeColor == Color.Gray && this.Text == WatermarkText)
+            {
+                this.ForeColor = Color.Black;
+                this.Text = String.Empty;
+            }
+        }
+
+        private void JkLookUpComboBox_Leave(object sender, EventArgs e)
+        {
+            if (this.Required)
+                AddWaterMark();
+            else
+                RemoveWaterMark();
         }
 
         private class JkLookupItem

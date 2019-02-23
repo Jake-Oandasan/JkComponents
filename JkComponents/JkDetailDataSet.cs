@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Drawing.Design;
 using System.Data;
 using System.Data.SqlClient;
+using System.Xml.Serialization;
 
 namespace JkComponents
 {
@@ -68,7 +69,7 @@ namespace JkComponents
             set
             {
                 if (GridView != null)
-                    UpdateGridSize(value, true);
+                    GridView.UpdateGridSize(value, true);
 
                 _GridAutoSize = value;
             }
@@ -90,7 +91,8 @@ namespace JkComponents
                 {
                     if (value)
                     {
-                        CreateGrid();
+                        GridView.CreateGrid();
+                        GridView.UpdateGridSize(GridAutoSize);
                         GridView.CreateFooter();
                     }
                     else
@@ -102,8 +104,21 @@ namespace JkComponents
             }
         }
 
+        private JkDataGridView _GridView;
         [Category("(Custom)")]
-        public JkDataGridView GridView { get; set; }
+        public JkDataGridView GridView
+        {
+            get { return _GridView; }
+            set
+            {
+                _GridView = value;
+
+                if (value == null)
+                    _GridView.DataSet = null;
+                else
+                    _GridView.DataSet = this;
+            }
+        }
 
         [Category("(Custom)")]
         public String ConnectionString { get; set; }
@@ -113,7 +128,6 @@ namespace JkComponents
 
         public JkDetailDataSet()
         {
-            InitializeComponent();
             this.BackColor = Color.Tan;
             this.Visible = false;
         }
@@ -197,123 +211,32 @@ namespace JkComponents
             return param.SqlDbType;
         }
 
-        private void CreateGrid()
+        public void AddTemporaryColumns()
         {
-            JkDetailColumn col;
-
-            for (int i = 0; i <= Columns.Count - 1; i++)
+            foreach (JkDetailColumn column in this.Columns)
             {
-                col = Columns[i];
-
-                DataGridViewTextBoxColumn GridColText = new DataGridViewTextBoxColumn();
-                DataGridViewCheckBoxColumn GridColCheck = new DataGridViewCheckBoxColumn();
-                DataGridViewComboBoxColumn GridColCombo = new DataGridViewComboBoxColumn();
-                DataGridViewTextBoxColumn GridColDate = new DataGridViewTextBoxColumn();
-
-                if (col.DataType == SqlDbType.Bit)
+                if (column.Temporary && !this.DataTable.Columns.Contains(column.Name))
                 {
-                    GridColCheck.Name = "dataGridViewColumn" + col.Name.Trim();
-                    GridColCheck.HeaderText = col.Caption;
-                    GridColCheck.Width = col.Width;
-                    GridColCheck.Visible = col.Visible;
-                    GridColCheck.DataPropertyName = col.Name;
-                    GridColCheck.ReadOnly = col.ReadOnly;
+                    DataColumn tableColumn = new DataColumn();
 
-                    if (col.ReadOnly)
-                        GridColCheck.DefaultCellStyle.BackColor = Color.LightGray;
+                    tableColumn.ColumnName = column.Name;
+                    tableColumn.DataType = JKTypeConverter.ToNetType(JKTypeConverter.ToDbType(column.DataType));
+                    tableColumn.DefaultValue = column.DefaultValue;
+                    tableColumn.AllowDBNull = !column.Required;
+                    tableColumn.Caption = column.Caption;
 
-                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCheck });
-                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColCheck.Name) == null)
-                        _GridColumn.Add(GridColCheck);
-                }
-                else if (col.DataType == SqlDbType.DateTime)
-                {
-                    GridColDate.Name = "dataGridViewColumn" + col.Name.Trim();
-                    GridColDate.HeaderText = col.Caption;
-                    GridColDate.Width = col.Width;
-                    GridColDate.Visible = col.Visible;
-                    GridColDate.DataPropertyName = col.Name;
-                    GridColDate.DefaultCellStyle.Format = "MM'/'dd'/'yyyy";
-                    GridColDate.ReadOnly = col.ReadOnly;
-
-                    if (col.ReadOnly)
-                        GridColDate.DefaultCellStyle.BackColor = Color.LightGray;
-
-                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColDate });
-                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColDate.Name) == null)
-                        _GridColumn.Add(GridColDate);
-                }
-                else if (!String.IsNullOrWhiteSpace(col.ControlName))
-                {
-                    GridColCombo.Name = "dataGridViewColumn" + col.Name.Trim();
-                    GridColCombo.HeaderText = col.Caption;
-                    GridColCombo.Width = col.Width;
-                    GridColCombo.Visible = col.Visible;
-                    GridColCombo.DataPropertyName = col.Name;
-                    GridColCombo.DisplayStyle = DataGridViewComboBoxDisplayStyle.ComboBox;
-                    GridColCombo.DropDownWidth = 200;
-                    GridColCombo.ReadOnly = col.ReadOnly;
-
-                    if (col.ReadOnly)
-                        GridColCombo.DefaultCellStyle.BackColor = Color.LightGray;
-
-                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColCombo });
-                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColCombo.Name) == null)
-                        _GridColumn.Add(GridColCombo);
-                }
-                else
-                {
-                    GridColText.Name = "dataGridViewColumn" + col.Name.Trim();
-                    GridColText.HeaderText = col.Caption;
-                    GridColText.Width = col.Width;
-                    GridColText.Visible = col.Visible;
-                    GridColText.DataPropertyName = col.Name;
-                    GridColText.ReadOnly = col.ReadOnly;
-
-                    if (col.ReadOnly)
-                        GridColText.DefaultCellStyle.BackColor = Color.LightGray;
-
-                    if (col.DataType == SqlDbType.Money || col.DataType == SqlDbType.Float || col.DataType == SqlDbType.Decimal)
-                    {
-                        GridColText.DefaultCellStyle.Format = "N2";
-                        GridColText.ValueType = Type.GetType("System.Decimal");
-                        GridColText.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    }
-
-                    GridView.Columns.AddRange(new DataGridViewColumn[] { GridColText });
-                    if (_GridColumn.Find(gridCol => gridCol.Name == GridColText.Name) == null)
-                        _GridColumn.Add(GridColText);
+                    this.DataTable.Columns.Add(tableColumn);
                 }
             }
-            UpdateGridSize(GridAutoSize);
         }
 
-        private void UpdateGridSize(bool AutoSize, bool ResizeColumns = false)
+        public void RemoveTemporaryColumns()
         {
-            if (AutoSize)
-                GridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            else
+            foreach (JkDetailColumn column in this.Columns)
             {
-                GridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-
-                if (ResizeColumns)
-                    foreach (DataGridViewColumn dg in GridView.Columns)
-                    {
-                        dg.Width = (Columns.First(col => col.Name == dg.DataPropertyName) as JkDetailColumn).Width;
-                    }
+                if (column.Temporary && this.DataTable.Columns.Contains(column.Name))
+                    this.DataTable.Columns.Remove(column.Name);
             }
-            GridView.Update();
-        }
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // JkDetailDataSet
-            // 
-            this.Name = "JkDetailDataSet";
-            this.ResumeLayout(false);
-
         }
     }
 }
