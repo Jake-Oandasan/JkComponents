@@ -44,6 +44,7 @@ namespace JkComponents
             this.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.JkDataGridView_RowsAdded);
             this.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.JkDataGridView_RowsRemoved);
             this.Scroll += new System.Windows.Forms.ScrollEventHandler(this.JkDataGridView_Scroll);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.JkDataGridView_MouseClick);
             this.ParentChanged += new System.EventHandler(this.JkDataGridView_ParentChanged);
             ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
             this.ResumeLayout(false);
@@ -55,18 +56,18 @@ namespace JkComponents
             //change the parent of grid on runtime
             if (!DesignMode && this.Parent != null && this.Parent != GridParent)
             {
+                GridParent.Name = this.Name + "Parent";
+                GridFooter.Name = this.Name + "Footer";
+
                 GridFooter.BackColor = Color.Ivory;
                 GridFooter.BorderStyle = BorderStyle.Fixed3D;
                 GridFooter.WrapContents = false;
-
-                //remove auto scrolling feature of the panel
+                //remove auto scrolling feature of the footer
                 GridFooter.AutoScroll = false;
+                GridFooter.Dock = DockStyle.Bottom;
 
                 this.Parent.Controls.Add(GridParent);
                 this.Parent.Controls.Remove(this);
-
-                this.Dock = DockStyle.Fill;
-                GridFooter.Dock = DockStyle.Bottom;
 
                 this.Size = new Size(GridParent.Size.Width, GridParent.Size.Height - 35);
                 GridFooter.Size = new Size(this.Size.Width, 35);
@@ -74,6 +75,8 @@ namespace JkComponents
                 GridParent.Controls.Add(this);
                 GridParent.Controls.Add(GridFooter);
                 GridParent.Dock = DockStyle.Fill;
+
+                this.Dock = DockStyle.Fill;
             }
         }
 
@@ -313,7 +316,8 @@ namespace JkComponents
                 {
                     foreach(DataGridViewColumn gridColumn in this.Columns)
                     {
-                        if (gridColumn.DataPropertyName == column.Name)
+                        if (!String.IsNullOrWhiteSpace(gridColumn.DataPropertyName) &&
+                            gridColumn.DataPropertyName == column.Name)
                             e.Row.Cells[gridColumn.Index].Value = column.DefaultValue;
                     }
                 }
@@ -502,8 +506,87 @@ namespace JkComponents
 
         private void JkDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (this.DataSet.Columns.Find(c => c.Name == this.Columns[e.ColumnIndex].DataPropertyName).ReadOnly)
-                e.CellStyle.BackColor = Color.LightGray;
+            if (!String.IsNullOrWhiteSpace(this.Columns[e.ColumnIndex].DataPropertyName))
+                if (this.DataSet.Columns.Find(c => c.Name == this.Columns[e.ColumnIndex].DataPropertyName).ReadOnly)
+                    e.CellStyle.BackColor = Color.LightGray;
+        }
+
+        private void JkDataGridView_MouseClick(object sender, MouseEventArgs e)
+        {
+            //if (e.Button == MouseButtons.Right
+            //    && dataGridView.HitTest(e.X, e.Y).Type == DataGridViewHitTestType.Cell
+            //    && dataGridView.HitTest(e.X, e.Y).RowIndex != dataGridView.NewRowIndex)
+            //{
+            //    int RowIndex = dataGridView.HitTest(e.X, e.Y).RowIndex,
+            //        ColumnIndex = dataGridView.HitTest(e.X, e.Y).ColumnIndex;
+            //    ContextMenu menu = new ContextMenu();
+
+            //    MenuItem ClearMenu = new MenuItem();
+            //    MenuItem CopyMenu = new MenuItem();
+            //    MenuItem DeleteMenu = new MenuItem();
+            //    MenuItem PasteMenu = new MenuItem();
+
+            //    //set text
+            //    ClearMenu.Text = "Clear Cell";
+            //    CopyMenu.Text = "Copy";
+            //    DeleteMenu.Text = "Delete Row";
+            //    PasteMenu.Text = "Paste";
+
+            //    //set event
+            //    ClearMenu.Click += delegate(object s, EventArgs ea)
+            //    {
+            //        if (dstDetail.DataTable.Columns[dataGridView.Columns[ColumnIndex].DataPropertyName].AllowDBNull)
+            //            dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = DBNull.Value;
+            //        else
+            //            dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = 0;
+            //        splitContainerMasterDetail.Panel1.Focus();
+            //        dataGridView.Focus();
+            //    };
+            //    CopyMenu.Click += delegate(object s, EventArgs ea)
+            //    {
+            //        Clipboard.SetText(dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value.ToString(), TextDataFormat.Text);
+            //    };
+            //    DeleteMenu.Click += delegate(object s, EventArgs ea)
+            //    {
+            //        if (dataGridView.SelectedRows.Count > 0)
+            //        {
+            //            foreach (DataGridViewRow row in dataGridView.SelectedRows)
+            //            {
+            //                if (!row.IsNewRow)
+            //                    dataGridView.Rows.RemoveAt(row.Index);
+            //            }
+            //        }
+            //        else
+            //            dataGridView.Rows.RemoveAt(RowIndex);
+
+            //        splitContainerMasterDetail.Panel1.Focus();
+            //        dataGridView.Focus();
+            //    };
+            //    PasteMenu.Click += delegate(object s, EventArgs ea)
+            //    {
+            //        dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = Clipboard.GetText();
+            //        splitContainerMasterDetail.Panel1.Focus();
+            //        dataGridView.Focus();
+            //    };
+
+            //    //set if enabled
+            //    ClearMenu.Enabled = dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value != null
+            //        && dataGridView.AllowUserToDeleteRows
+            //        && !dataGridView.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
+            //    CopyMenu.Enabled = !String.IsNullOrEmpty(dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value.ToString());
+            //    DeleteMenu.Enabled = dataGridView.AllowUserToDeleteRows;
+            //    PasteMenu.Enabled = Clipboard.ContainsText()
+            //        && dataGridView.AllowUserToAddRows
+            //        && !dataGridView.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
+
+            //    //add on ContextMenu
+            //    menu.MenuItems.Add(ClearMenu);
+            //    menu.MenuItems.Add(CopyMenu);
+            //    menu.MenuItems.Add(DeleteMenu);
+            //    menu.MenuItems.Add(PasteMenu);
+
+            //    menu.Show(dataGridView, new Point(e.X, e.Y));
+            //}
         }
     }
 }
