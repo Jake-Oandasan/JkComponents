@@ -24,6 +24,7 @@ namespace JkComponents
         {
             InitializeComponent();
             ApplyStyleOnGrid(this);
+            this.AutoGenerateColumns = false;
         }
 
         private void InitializeComponent()

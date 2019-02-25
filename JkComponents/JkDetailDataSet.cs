@@ -126,6 +126,10 @@ namespace JkComponents
         [Browsable(false)]
         public DataTable DataTable = new DataTable();
 
+        private bool _LinkToMaster = true;
+        [Category("(Custom)")]
+        public bool LinkToMaster { get { return _LinkToMaster; } set { _LinkToMaster = value; } }
+
         public JkDetailDataSet()
         {
             this.BackColor = Color.Tan;
