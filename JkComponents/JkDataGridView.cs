@@ -514,80 +514,101 @@ namespace JkComponents
 
         private void JkDataGridView_MouseClick(object sender, MouseEventArgs e)
         {
-            //if (e.Button == MouseButtons.Right
-            //    && dataGridView.HitTest(e.X, e.Y).Type == DataGridViewHitTestType.Cell
-            //    && dataGridView.HitTest(e.X, e.Y).RowIndex != dataGridView.NewRowIndex)
-            //{
-            //    int RowIndex = dataGridView.HitTest(e.X, e.Y).RowIndex,
-            //        ColumnIndex = dataGridView.HitTest(e.X, e.Y).ColumnIndex;
-            //    ContextMenu menu = new ContextMenu();
+            if (e.Button == MouseButtons.Right
+                && this.HitTest(e.X, e.Y).Type == DataGridViewHitTestType.Cell
+                && this.HitTest(e.X, e.Y).RowIndex != this.NewRowIndex)
+            {
+                int RowIndex = this.HitTest(e.X, e.Y).RowIndex,
+                    ColumnIndex = this.HitTest(e.X, e.Y).ColumnIndex;
+                ContextMenu menu = new ContextMenu();
 
-            //    MenuItem ClearMenu = new MenuItem();
-            //    MenuItem CopyMenu = new MenuItem();
-            //    MenuItem DeleteMenu = new MenuItem();
-            //    MenuItem PasteMenu = new MenuItem();
+                MenuItem ClearMenu = new MenuItem();
+                MenuItem CopyMenu = new MenuItem();
+                MenuItem DeleteMenu = new MenuItem();
+                MenuItem PasteMenu = new MenuItem();
 
-            //    //set text
-            //    ClearMenu.Text = "Clear Cell";
-            //    CopyMenu.Text = "Copy";
-            //    DeleteMenu.Text = "Delete Row";
-            //    PasteMenu.Text = "Paste";
+                //set text
+                ClearMenu.Text = "Clear Cell";
+                CopyMenu.Text = "Copy";
+                DeleteMenu.Text = "Delete Row";
+                PasteMenu.Text = "Paste";
 
-            //    //set event
-            //    ClearMenu.Click += delegate(object s, EventArgs ea)
-            //    {
-            //        if (dstDetail.DataTable.Columns[dataGridView.Columns[ColumnIndex].DataPropertyName].AllowDBNull)
-            //            dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = DBNull.Value;
-            //        else
-            //            dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = 0;
-            //        splitContainerMasterDetail.Panel1.Focus();
-            //        dataGridView.Focus();
-            //    };
-            //    CopyMenu.Click += delegate(object s, EventArgs ea)
-            //    {
-            //        Clipboard.SetText(dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value.ToString(), TextDataFormat.Text);
-            //    };
-            //    DeleteMenu.Click += delegate(object s, EventArgs ea)
-            //    {
-            //        if (dataGridView.SelectedRows.Count > 0)
-            //        {
-            //            foreach (DataGridViewRow row in dataGridView.SelectedRows)
-            //            {
-            //                if (!row.IsNewRow)
-            //                    dataGridView.Rows.RemoveAt(row.Index);
-            //            }
-            //        }
-            //        else
-            //            dataGridView.Rows.RemoveAt(RowIndex);
+                //set event
+                ClearMenu.Click += delegate(object s, EventArgs ea)
+                {
+                    if (this.DataSet.DataTable.Columns[this.Columns[ColumnIndex].DataPropertyName].AllowDBNull)
+                        this.DataSet.DataTable.Rows[RowIndex][this.Columns[ColumnIndex].DataPropertyName] = DBNull.Value;
+                    else
+                        this.DataSet.DataTable.Rows[RowIndex][this.Columns[ColumnIndex].DataPropertyName] = 0;
+                    
+                    this.Parent.Focus();
+                    this.Focus();
+                };
+                CopyMenu.Click += delegate(object s, EventArgs ea)
+                {
+                    if (this.Columns[ColumnIndex] is DataGridViewComboBoxColumn)
+                    {
+                        String value = "";
+                        JkLookUpComboBox.JkLookupItem lookUp = null;
+                    
 
-            //        splitContainerMasterDetail.Panel1.Focus();
-            //        dataGridView.Focus();
-            //    };
-            //    PasteMenu.Click += delegate(object s, EventArgs ea)
-            //    {
-            //        dstDetail.DataTable.Rows[RowIndex][dataGridView.Columns[ColumnIndex].DataPropertyName] = Clipboard.GetText();
-            //        splitContainerMasterDetail.Panel1.Focus();
-            //        dataGridView.Focus();
-            //    };
+                        foreach (Object item in (this.Columns[ColumnIndex] as DataGridViewComboBoxColumn).Items)
+                        {
+                            lookUp = item as JkLookUpComboBox.JkLookupItem;
 
-            //    //set if enabled
-            //    ClearMenu.Enabled = dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value != null
-            //        && dataGridView.AllowUserToDeleteRows
-            //        && !dataGridView.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
-            //    CopyMenu.Enabled = !String.IsNullOrEmpty(dataGridView.Rows[RowIndex].Cells[ColumnIndex].Value.ToString());
-            //    DeleteMenu.Enabled = dataGridView.AllowUserToDeleteRows;
-            //    PasteMenu.Enabled = Clipboard.ContainsText()
-            //        && dataGridView.AllowUserToAddRows
-            //        && !dataGridView.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
+                            if (lookUp.Key == int.Parse(this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString()))
+                            {
+                                value = lookUp.DisplayText;
+                                break;
+                            }
+                        }
+                        Clipboard.SetText(value, TextDataFormat.Text);
+                    }
+                    else
+                        Clipboard.SetText(this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString(), TextDataFormat.Text);
+                };
+                DeleteMenu.Click += delegate(object s, EventArgs ea)
+                {
+                    if (this.SelectedRows.Count > 0)
+                    {
+                        foreach (DataGridViewRow row in this.SelectedRows)
+                        {
+                            if (!row.IsNewRow)
+                                this.Rows.RemoveAt(row.Index);
+                        }
+                    }
+                    else
+                        this.Rows.RemoveAt(RowIndex);
 
-            //    //add on ContextMenu
-            //    menu.MenuItems.Add(ClearMenu);
-            //    menu.MenuItems.Add(CopyMenu);
-            //    menu.MenuItems.Add(DeleteMenu);
-            //    menu.MenuItems.Add(PasteMenu);
+                    this.Parent.Focus();
+                    this.Focus();
+                };
+                PasteMenu.Click += delegate(object s, EventArgs ea)
+                {
+                    this.DataSet.DataTable.Rows[RowIndex][this.Columns[ColumnIndex].DataPropertyName] = Clipboard.GetText();
+                    
+                    this.Parent.Focus();
+                    this.Focus();
+                };
 
-            //    menu.Show(dataGridView, new Point(e.X, e.Y));
-            //}
+                //set if enabled
+                ClearMenu.Enabled = this.Rows[RowIndex].Cells[ColumnIndex].Value != null
+                    && this.AllowUserToDeleteRows
+                    && !this.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
+                CopyMenu.Enabled = !String.IsNullOrEmpty(this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString());
+                DeleteMenu.Enabled = this.AllowUserToDeleteRows;
+                PasteMenu.Enabled = Clipboard.ContainsText()
+                    && this.AllowUserToAddRows
+                    && !this.Rows[RowIndex].Cells[ColumnIndex].ReadOnly;
+
+                //add on ContextMenu
+                menu.MenuItems.Add(ClearMenu);
+                menu.MenuItems.Add(CopyMenu);
+                menu.MenuItems.Add(DeleteMenu);
+                menu.MenuItems.Add(PasteMenu);
+
+                menu.Show(this, new Point(e.X, e.Y));
+            }
         }
     }
 }

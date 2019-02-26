@@ -172,7 +172,7 @@ namespace JkComponents
                 RemoveWaterMark();
         }
 
-        private class JkLookupItem
+        public class JkLookupItem
         {
             private int _Key;
             private string _DisplayText;
