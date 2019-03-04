@@ -126,7 +126,7 @@ namespace JkComponents
                         lblFooter.Name = "lblFooter" + ic.Caption.Trim();
                         lblFooter.TextAlign = ContentAlignment.MiddleCenter;
                         lblFooter.Text = AssignFooterValue(ic.FooterType, "0");
-                        lblFooter.Font = new Font(this.Font.Name, this.Font.Size, FontStyle.Bold);
+                        lblFooter.Font = new Font(this.Font.Name, this.Font.Size - 1, FontStyle.Bold);
                         
 
                         if (DataSet.GridAutoSize)
@@ -154,84 +154,103 @@ namespace JkComponents
         public void ComputeFooterValues()
         {
             String value = "";
-
-            foreach (JkDetailColumn ic in DataSet.Columns)
+            try
             {
-                if (ic.Visible
-                    && ic.FooterType != JkDetailColumn.ColumnFooterTypes.ftNone
-                    && DataSet.DataTable.Columns.Contains(ic.Name))
+
+                foreach (JkDetailColumn ic in DataSet.Columns)
                 {
-                    if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftAvg)
+                    if (ic.Visible
+                        && ic.FooterType != JkDetailColumn.ColumnFooterTypes.ftNone
+                        && DataSet.DataTable.Columns.Contains(ic.Name))
                     {
-                        double total = 0;
-
-                        if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                        if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftAvg)
                         {
-                            foreach (DataRow row in DataSet.DataTable.Rows)
-                                if (row.RowState != DataRowState.Deleted && row[ic.Name] != null)
-                                    total += Double.Parse(row[ic.Name].ToString());
+                            double total = 0;
 
-                            total = total / DataSet.DataTable.Rows.Count;
+                            foreach (DataGridViewRow row in this.Rows)
+                                if (row.Index != this.NewRowIndex
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != null)
+                                    total += Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
+
+                            if (this.Rows.Count > 0)
+                                total = total / this.Rows.Count;
+
+                            value = total.ToString("N2");
                         }
-                        value = total.ToString("N2");
-                    }
-                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
-                        value = DataSet.DataTable.Rows.Count.ToString();
-                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMax)
-                    {
-                        double max = 0;
-
-                        if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                        else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
+                            value = DataSet.DataTable.Rows.Count.ToString();
+                        else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMax)
                         {
-                            foreach (DataRow row in DataSet.DataTable.Rows)
-                                if (row.RowState != DataRowState.Deleted && row[ic.Name] != null && Double.Parse(row[ic.Name].ToString()) > max)
-                                    max = Double.Parse(row[ic.Name].ToString());
+                            double max = 0;
+
+                            foreach (DataGridViewRow row in this.Rows)
+                                if (row.Index != this.NewRowIndex
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                    && Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString()) > max)
+                                    max = Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
+
+                            if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
+                                value = max.ToString();
+                            else
+                                value = max.ToString("N2");
                         }
-
-                        if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
-                            value = max.ToString();
-                        else
-                            value = max.ToString("N2");
-                    }
-                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMin)
-                    {
-                        double min = 2147483647;
-
-                        if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                        else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMin)
                         {
-                            foreach (DataRow row in DataSet.DataTable.Rows)
-                                if (row.RowState != DataRowState.Deleted && row[ic.Name] != null && Double.Parse(row[ic.Name].ToString()) < min)
-                                    min = Double.Parse(row[ic.Name].ToString());
+                            double min = 2147483647;
+
+                            if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                            {
+                                foreach (DataGridViewRow row in this.Rows)
+                                    if (row.Index != this.NewRowIndex
+                                        && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                        && Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString()) < min)
+                                        min = Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
+                            }
+                            else
+                                min = 0;
+
+                            if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
+                                value = min.ToString();
+                            else
+                                value = min.ToString("N2");
                         }
-                        else
-                            min = 0;
-
-                        if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
-                            value = min.ToString();
-                        else
-                            value = min.ToString("N2");
-                    }
-                    else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftSum)
-                    {
-                        double total = 0;
-
-                        if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                        else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftSum)
                         {
-                            foreach (DataRow row in DataSet.DataTable.Rows)
-                                if (row.RowState != DataRowState.Deleted && row[ic.Name] != null)
-                                    total += Double.Parse(row[ic.Name].ToString());
+                            double total = 0;
+
+                            foreach (DataGridViewRow row in this.Rows)
+                            {
+                                if (row.Index != this.NewRowIndex
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != null)
+                                    total += Double.Parse(row.Cells[GetCellIndex(ic.Name)].Value.ToString());
+                            }
+
+                            value = total.ToString("N2");
                         }
 
-                        value = total.ToString("N2");
+                        foreach (Control c in GridFooter.Controls)
+                        {
+                            if (c.Name == "lblFooter" + ic.Caption.Trim())
+                                c.Text = AssignFooterValue(ic.FooterType, value);
+                        }
                     }
-
-                    foreach (Control c in GridFooter.Controls)
-                    {
-                        if (c.Name == "lblFooter" + ic.Caption.Trim())
-                            c.Text = AssignFooterValue(ic.FooterType, value);
-                    }
-                }
             }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this.Name + " Error: " + ex.Message);
+            }
+        }
+
+        public int GetCellIndex(String DataPropertyName)
+        {
+            foreach (DataGridViewColumn column in this.Columns)
+            {
+                if (column.DataPropertyName == DataPropertyName)
+                    return column.Index;
+            }
+
+            return -1;
         }
 
         private int VisibleColumnCount()
