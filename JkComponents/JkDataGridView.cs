@@ -33,7 +33,7 @@ namespace JkComponents
         }
 
         [Browsable(false)]
-        private List<MenuItem> MenuItems;
+        private List<MenuItem> MenuItems = new List<MenuItem>();
 
         public JkDataGridView()
         {
@@ -661,8 +661,14 @@ namespace JkComponents
 
         public void AddMenuItem(MenuItem item)
         {
-            MenuItems = new List<MenuItem>();
+            MenuItems.Clear();
             MenuItems.Add(item);
+        }
+
+        public void RemoveMenuItem(String Text)
+        {
+            if (MenuItems.Find(mi => mi.Text == Text) != null)
+                MenuItems.Remove(MenuItems.Find(mi => mi.Text == Text));
         }
     }
 }
