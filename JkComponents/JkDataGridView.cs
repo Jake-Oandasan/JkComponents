@@ -20,6 +20,21 @@ namespace JkComponents
         [Browsable(false)]
         public JkDetailDataSet DataSet { get; set; }
 
+        [Browsable(false)]
+        public int DataRowCount
+        {
+            get
+            {
+                if (this.AllowUserToAddRows)
+                    return this.Rows.Count - 1;
+                else
+                    return this.Rows.Count;
+            }
+        }
+
+        [Browsable(false)]
+        private List<MenuItem> MenuItems;
+
         public JkDataGridView()
         {
             InitializeComponent();
@@ -36,6 +51,7 @@ namespace JkComponents
             // 
             this.DataMemberChanged += new System.EventHandler(this.JkDataGridView_DataMemberChanged);
             this.DataSourceChanged += new System.EventHandler(this.JkDataGridView_DataSourceChanged);
+            this.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEndEdit);
             this.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.JkDataGridView_CellFormatting);
             this.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellValueChanged);
             this.ColumnWidthChanged += new System.Windows.Forms.DataGridViewColumnEventHandler(this.JkDataGridView_ColumnWidthChanged);
@@ -169,16 +185,17 @@ namespace JkComponents
 
                             foreach (DataGridViewRow row in this.Rows)
                                 if (row.Index != this.NewRowIndex
-                                    && row.Cells[GetCellIndex(ic.Name)].Value != null)
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != DBNull.Value)
                                     total += Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
 
-                            if (this.Rows.Count > 0)
-                                total = total / this.Rows.Count;
+                            if (this.DataRowCount > 0)
+                                total = total / this.DataRowCount;
 
                             value = total.ToString("N2");
                         }
                         else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
-                            value = DataSet.DataTable.Rows.Count.ToString();
+                            value = this.DataRowCount.ToString();
                         else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMax)
                         {
                             double max = 0;
@@ -186,6 +203,7 @@ namespace JkComponents
                             foreach (DataGridViewRow row in this.Rows)
                                 if (row.Index != this.NewRowIndex
                                     && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != DBNull.Value
                                     && Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString()) > max)
                                     max = Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
 
@@ -198,11 +216,12 @@ namespace JkComponents
                         {
                             double min = 2147483647;
 
-                            if (this.Rows.Count > 0 && this.NewRowIndex != 0)
+                            if (this.DataRowCount > 0)
                             {
                                 foreach (DataGridViewRow row in this.Rows)
                                     if (row.Index != this.NewRowIndex
                                         && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                        && row.Cells[GetCellIndex(ic.Name)].Value != DBNull.Value
                                         && Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString()) < min)
                                         min = Double.Parse(row.Cells[GetCellIndex(ic.Name)].ToString());
                             }
@@ -221,7 +240,8 @@ namespace JkComponents
                             foreach (DataGridViewRow row in this.Rows)
                             {
                                 if (row.Index != this.NewRowIndex
-                                    && row.Cells[GetCellIndex(ic.Name)].Value != null)
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != null
+                                    && row.Cells[GetCellIndex(ic.Name)].Value != DBNull.Value)
                                     total += Double.Parse(row.Cells[GetCellIndex(ic.Name)].Value.ToString());
                             }
 
@@ -433,6 +453,7 @@ namespace JkComponents
                 GridColCombo.Visible = column.Visible;
                 GridColCombo.DataPropertyName = column.Name;
                 GridColCombo.ReadOnly = column.ReadOnly;
+                GridColCombo.AutoComplete = true;
 
                 ApplyColumnStyle(column, GridColCombo);
                 grid.Columns.Add(GridColCombo);
@@ -626,8 +647,22 @@ namespace JkComponents
                 menu.MenuItems.Add(DeleteMenu);
                 menu.MenuItems.Add(PasteMenu);
 
+                foreach (MenuItem item in MenuItems)
+                    menu.MenuItems.Add(item);
+
                 menu.Show(this, new Point(e.X, e.Y));
             }
+        }
+
+        private void JkDataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            this.BindingContext[this.DataSource].EndCurrentEdit();
+        }
+
+        public void AddMenuItem(MenuItem item)
+        {
+            MenuItems = new List<MenuItem>();
+            MenuItems.Add(item);
         }
     }
 }

@@ -68,6 +68,8 @@ namespace JkComponents
         public JkLookUpComboBox()
         {
             InitializeComponent();
+            this.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            this.AutoCompleteSource = AutoCompleteSource.ListItems;
         }
 
         public void LoadData()
