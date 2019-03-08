@@ -560,6 +560,14 @@ namespace JkComponents
             {
                 int RowIndex = this.HitTest(e.X, e.Y).RowIndex,
                     ColumnIndex = this.HitTest(e.X, e.Y).ColumnIndex;
+
+                //select the cell
+                if (this.SelectedRows.Count < 2)
+                {
+                    this.SelectedCells[0].Selected = false;
+                    this.Rows[RowIndex].Cells[ColumnIndex].Selected = true;
+                }
+
                 ContextMenu menu = new ContextMenu();
 
                 MenuItem ClearMenu = new MenuItem();
