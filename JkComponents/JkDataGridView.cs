@@ -192,7 +192,7 @@ namespace JkComponents
                             if (this.DataRowCount > 0)
                                 total = total / this.DataRowCount;
 
-                            value = total.ToString("N2");
+                            value = total.ToString("#,##0.00;(#,##0.00)");
                         }
                         else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftCount)
                             value = this.DataRowCount.ToString();
@@ -210,7 +210,7 @@ namespace JkComponents
                             if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
                                 value = max.ToString();
                             else
-                                value = max.ToString("N2");
+                                value = max.ToString("#,##0.00;(#,##0.00)");
                         }
                         else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftMin)
                         {
@@ -231,7 +231,7 @@ namespace JkComponents
                             if (ic.DataType == SqlDbType.BigInt || ic.DataType == SqlDbType.Int)
                                 value = min.ToString();
                             else
-                                value = min.ToString("N2");
+                                value = min.ToString("#,##0.00;(#,##0.00)");
                         }
                         else if (ic.FooterType == JkDetailColumn.ColumnFooterTypes.ftSum)
                         {
@@ -245,7 +245,7 @@ namespace JkComponents
                                     total += Double.Parse(row.Cells[GetCellIndex(ic.Name)].Value.ToString());
                             }
 
-                            value = total.ToString("N2");
+                            value = total.ToString("#,##0.00;(#,##0.00)");
                         }
 
                         foreach (Control c in GridFooter.Controls)
@@ -402,7 +402,7 @@ namespace JkComponents
                 || detailColumn.DataType == SqlDbType.Float
                 || detailColumn.DataType == SqlDbType.Decimal)
             {
-                gridColumn.DefaultCellStyle.Format = "N2";
+                gridColumn.DefaultCellStyle.Format = "#,##0.00;(#,##0.00)";
                 gridColumn.ValueType = Type.GetType("System.Decimal");
                 gridColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
