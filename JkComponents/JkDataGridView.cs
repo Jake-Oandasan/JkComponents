@@ -35,6 +35,8 @@ namespace JkComponents
         [Browsable(false)]
         private List<MenuItem> MenuItems = new List<MenuItem>();
 
+        private DateTimePicker datePicker = new DateTimePicker();
+
         public JkDataGridView()
         {
             InitializeComponent();
@@ -51,8 +53,11 @@ namespace JkComponents
             // 
             this.DataMemberChanged += new System.EventHandler(this.JkDataGridView_DataMemberChanged);
             this.DataSourceChanged += new System.EventHandler(this.JkDataGridView_DataSourceChanged);
+            this.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellClick);
             this.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEndEdit);
+            this.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEnter);
             this.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.JkDataGridView_CellFormatting);
+            this.CellLeave += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellLeave);
             this.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellValueChanged);
             this.ColumnWidthChanged += new System.Windows.Forms.DataGridViewColumnEventHandler(this.JkDataGridView_ColumnWidthChanged);
             this.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.JkDataGridView_DataError);
@@ -334,6 +339,10 @@ namespace JkComponents
         private void JkDataGridView_Scroll(object sender, ScrollEventArgs e)
         {
             HScrollBar hScrollBar = this.Controls.OfType<HScrollBar>().First();
+
+            foreach (Control control in this.Controls)
+                if (control is DateTimePicker)
+                    control.Visible = false;
 
             //GridFooter will scroll depending on scroll of the grid
             if (hScrollBar.Visible && e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
@@ -677,6 +686,66 @@ namespace JkComponents
         {
             if (MenuItems.Find(mi => mi.Text == Text) != null)
                 MenuItems.Remove(MenuItems.Find(mi => mi.Text == Text));
+        }
+
+        private void JkDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (this.EditMode != DataGridViewEditMode.EditProgrammatically
+                && this.Columns[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
+            {
+                this.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
+
+                Rectangle Rectangle = this.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+
+                this.Controls.Add(datePicker);
+                datePicker.Format = DateTimePickerFormat.Custom;
+                datePicker.CustomFormat = "MM'/'dd'/'yyyy";
+
+                if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != null
+                    && this.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != DBNull.Value)
+                    datePicker.Value = DateTime.Parse(this.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
+
+                datePicker.Size = new Size(Rectangle.Width, Rectangle.Height);
+                datePicker.Location = new Point(Rectangle.X, Rectangle.Y);
+
+                datePicker.CloseUp += datePicker_CloseUp;
+                datePicker.ValueChanged += datePicker_ValueChanged;
+
+                datePicker.Visible = true;
+                datePicker.Focus();
+            }
+        }
+
+        private void datePicker_ValueChanged(object sender, EventArgs e)
+        {
+            this.CurrentCell.Value = datePicker.Value;
+        }
+
+        private void datePicker_CloseUp(object sender, EventArgs e)
+        {
+            datePicker.Visible = false;
+        }
+
+        private void JkDataGridView_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            if (this.EditMode != DataGridViewEditMode.EditProgrammatically)
+            {
+                if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
+                {
+                    JkDataGridView_CellClick(sender, e);
+                }
+            }
+        }
+
+        private void JkDataGridView_CellLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            if (this.EditMode != DataGridViewEditMode.EditProgrammatically)
+            {
+                if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
+                {
+                    datePicker.Visible = false;
+                }
+            }
         }
     }
 }
