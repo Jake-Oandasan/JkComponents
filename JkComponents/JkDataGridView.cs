@@ -690,7 +690,9 @@ namespace JkComponents
 
         private void JkDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (this.EditMode != DataGridViewEditMode.EditProgrammatically
+            if (e.ColumnIndex > -1
+                && e.RowIndex > -1
+                && this.EditMode != DataGridViewEditMode.EditProgrammatically
                 && this.Columns[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
             {
                 this.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
@@ -728,7 +730,9 @@ namespace JkComponents
 
         private void JkDataGridView_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
-            if (this.EditMode != DataGridViewEditMode.EditProgrammatically)
+            if (e.ColumnIndex > -1
+                && e.RowIndex > -1
+                && this.EditMode != DataGridViewEditMode.EditProgrammatically)
             {
                 if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
                 {
@@ -739,7 +743,9 @@ namespace JkComponents
 
         private void JkDataGridView_CellLeave(object sender, DataGridViewCellEventArgs e)
         {
-            if (this.EditMode != DataGridViewEditMode.EditProgrammatically)
+            if (e.ColumnIndex > -1
+                && e.RowIndex > -1
+                && this.EditMode != DataGridViewEditMode.EditProgrammatically)
             {
                 if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
                 {
