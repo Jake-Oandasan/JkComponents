@@ -56,6 +56,12 @@ namespace JkComponents
         [Category("(Custom)")]
         public JkConnection Connection { get; set; }
 
+        [Category("(Custom)")]
+        public String Filter { get; set; }
+
+        [Category("(Custom)")]
+        public bool Filtered { get; set; }
+
         public delegate void BeforeOpenHandler(object sender);
         public event BeforeOpenHandler BeforeOpen;
         protected virtual void OnBeforeOpen()
@@ -132,6 +138,7 @@ namespace JkComponents
 
         public void Open()
         {
+            JkDataSetList.Add(this);
             OnBeforeOpen();
             SqlDataAdapter DataAdapter = new SqlDataAdapter(CommandText, Connection.ConnectionString);
 
@@ -154,6 +161,7 @@ namespace JkComponents
                         }
                     }
 
+                    DataTable.Clear();
                     DataAdapter.Fill(DataTable);
                 }
                 finally
@@ -229,7 +237,7 @@ namespace JkComponents
         }
     }
 
-    public static class JkDataSets
+    public static class JkDataSetList
     {
         public static List<JkDataSet> List = new List<JkDataSet>();
 

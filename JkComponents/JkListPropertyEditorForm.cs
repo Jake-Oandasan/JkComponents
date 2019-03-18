@@ -23,7 +23,7 @@ namespace JkComponents
         {
             InitializeComponent();
 
-            foreach (JkLookUpProvider provider in JkLookUpProviders.List)
+            foreach (JkLookUpProvider provider in JkLookUpProviderList.List)
             {
                 foreach (Control dataset in provider.Controls)
                     comboBoxItem.Items.Add(dataset.Name);

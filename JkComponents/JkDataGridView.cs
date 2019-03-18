@@ -53,6 +53,7 @@ namespace JkComponents
             // 
             this.DataMemberChanged += new System.EventHandler(this.JkDataGridView_DataMemberChanged);
             this.DataSourceChanged += new System.EventHandler(this.JkDataGridView_DataSourceChanged);
+            this.EditModeChanged += new System.EventHandler(this.JkDataGridView_EditModeChanged);
             this.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellClick);
             this.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEndEdit);
             this.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.JkDataGridView_CellEnter);
@@ -605,21 +606,10 @@ namespace JkComponents
                 {
                     if (this.Columns[ColumnIndex] is DataGridViewComboBoxColumn)
                     {
-                        String value = "";
-                        JkLookUpComboBox.JkLookupItem lookUp = null;
-                    
+                        String value = this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString();
 
-                        foreach (Object item in (this.Columns[ColumnIndex] as DataGridViewComboBoxColumn).Items)
-                        {
-                            lookUp = item as JkLookUpComboBox.JkLookupItem;
-
-                            if (lookUp.Key == int.Parse(this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString()))
-                            {
-                                value = lookUp.DisplayText;
-                                break;
-                            }
-                        }
-                        Clipboard.SetText(value, TextDataFormat.Text);
+                        if (!String.IsNullOrWhiteSpace(value))
+                            Clipboard.SetText(value, TextDataFormat.Text);
                     }
                     else
                         Clipboard.SetText(this.Rows[RowIndex].Cells[ColumnIndex].Value.ToString(), TextDataFormat.Text);
@@ -750,6 +740,29 @@ namespace JkComponents
                 if (this.Rows[e.RowIndex].Cells[e.ColumnIndex].ValueType == Type.GetType("System.DateTime"))
                 {
                     datePicker.Visible = false;
+                }
+            }
+        }
+
+        private void JkDataGridView_EditModeChanged(object sender, EventArgs e)
+        {
+            foreach(DataGridViewColumn column in this.Columns)
+            {
+                if (this.Columns[column.Index] is DataGridViewComboBoxColumn)
+                {
+                    String controlName = this.DataSet.Columns.Find(c => c.Name == this.Columns[column.Index].DataPropertyName).ControlName;
+                    JkLookUpComboBox comboBox = JkLookUpComboBoxList.FindByName(controlName);
+                    JkDataSet dataSet = JkDataSetList.FindByName(comboBox.DataSet);
+
+                    if (dataSet.Filtered
+                        && dataSet.Filter != null
+                        && this.EditMode != DataGridViewEditMode.EditProgrammatically
+                        && !String.IsNullOrWhiteSpace(dataSet.Filter))
+                    {
+                        ((this.Columns[column.Index] as DataGridViewComboBoxColumn).DataSource as DataTable).DefaultView.RowFilter = dataSet.Filter;
+                    }
+                    else
+                        ((this.Columns[column.Index] as DataGridViewComboBoxColumn).DataSource as DataTable).DefaultView.RowFilter = String.Empty;
                 }
             }
         }

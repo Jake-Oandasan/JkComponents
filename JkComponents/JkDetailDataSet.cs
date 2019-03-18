@@ -163,7 +163,8 @@ namespace JkComponents
                 {
                     for (int i = 0; i <= Parameters.Count - 1; i++)
                     {
-                        if (String.IsNullOrWhiteSpace(Parameters[i].Value))
+                        if (String.IsNullOrWhiteSpace(Parameters[i].Value)
+                            || Parameters[i].Value[0].ToString() == "@")
                         {
                             DataAdapter.SelectCommand.Parameters.AddWithValue("@" + Parameters[i].Name, 0);
                         }

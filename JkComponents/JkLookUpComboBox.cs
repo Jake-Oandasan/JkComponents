@@ -13,9 +13,32 @@ namespace JkComponents
 {
     public class JkLookUpComboBox: ComboBox
     {
+        private String _DataSet;
         [Category("(Custom)")]
         [Editor(typeof(JkListPropertyTypeEditor), typeof(UITypeEditor))]
-        public String DataSet { get; set; }
+        public String DataSet
+        {
+            get { return _DataSet; }
+            set
+            {
+                if (!String.IsNullOrWhiteSpace(value))
+                    foreach (Control provider in JkLookUpProviderList.List)
+                    {
+                        foreach (Control dataset in provider.Controls)
+                        {
+                            if (dataset.Name == value)
+                            {
+                                DS = (dataset as JkDataSet);
+                                break;
+                            }
+                        }
+                    }
+
+                _DataSet = value;
+            }
+        }
+
+        private JkDataSet DS;
 
         [Category("(Custom)")]
         public string Key { get; set; }
@@ -23,28 +46,6 @@ namespace JkComponents
         [Category("(Custom)")]
         public string DisplayText { get; set; }
 
-        [Browsable(false)]
-        public int SelectedKey
-        {
-            get
-            {
-                if (this.SelectedItem == null)
-                    return Convert.ToInt32(null);
-
-                return (this.SelectedItem as JkLookupItem).Key;
-            }
-            set
-            {
-                foreach(Object item in this.Items)
-                {
-                    if ((item as JkLookupItem).Key == value)
-                    {
-                        this.SelectedItem = item;
-                        this.Text = (item as JkLookupItem).DisplayText;
-                    }
-                }
-            }
-        }
 
         private String WatermarkText = "Required";
         private bool _Required;
@@ -63,12 +64,11 @@ namespace JkComponents
                     RemoveWaterMark();
             }
         }
-        
 
         public JkLookUpComboBox()
         {
             InitializeComponent();
-            this.AutoCompleteMode = AutoCompleteMode.Suggest;
+            this.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             this.AutoCompleteSource = AutoCompleteSource.ListItems;
         }
 
@@ -76,20 +76,6 @@ namespace JkComponents
         {
             if (String.IsNullOrWhiteSpace(DataSet))
                 return;
-
-            JkDataSet DS = null;
-
-            foreach (Control provider in JkLookUpProviders.List)
-            {
-                foreach (Control dataset in provider.Controls)
-                {
-                    if (dataset.Name == DataSet)
-                    {
-                        DS = (dataset as JkDataSet);
-                        break;
-                    }
-                }
-            }
 
             if (DS == null)
                 throw new Exception(String.Format("Object name: {0} \rNo dataset found named: {1}", this.Name, DataSet));
@@ -106,10 +92,10 @@ namespace JkComponents
                     if (!DS.DataTable.Columns.Contains(DisplayText))
                         throw new Exception(String.Format("Object name: {0} \rNo DisplayText column found named: {1}", this.Name, DisplayText));
 
-                    foreach (DataRow row in DS.DataTable.Rows)
-                    {
-                        this.Items.Add(new JkLookupItem(Convert.ToInt32(row[Key]), row[DisplayText].ToString()));
-                    }
+                    this.DataSource = DS.DataTable;
+                    this.DisplayMember = this.DisplayText;
+                    this.ValueMember = this.Key;
+                    JkLookUpComboBoxList.Add(this);
                 }
             }
         }
@@ -142,6 +128,7 @@ namespace JkComponents
             // JkLookUpComboBox
             // 
             this.DropDown += new System.EventHandler(this.JkLookUpComboBox_DropDown);
+            this.EnabledChanged += new System.EventHandler(this.JkLookUpComboBox_EnabledChanged);
             this.Enter += new System.EventHandler(this.JkLookUpComboBox_Enter);
             this.Leave += new System.EventHandler(this.JkLookUpComboBox_Leave);
             this.ResumeLayout(false);
@@ -155,6 +142,27 @@ namespace JkComponents
                 this.ForeColor = Color.Black;
                 this.Text = String.Empty;
             }
+        }
+
+        public void FilterDataSource()
+        {
+            if (DS.Filtered
+                && DS.Filter != null
+                && !String.IsNullOrWhiteSpace(DS.Filter))
+            {
+                Object value = this.SelectedValue;
+                (this.DataSource as DataTable).DefaultView.RowFilter = DS.Filter;
+
+                if (value != null && value != DBNull.Value)
+                    this.SelectedValue = value;
+            }
+            else
+                RemoveFilterOnDataSource();
+        }
+
+        public void RemoveFilterOnDataSource()
+        {
+            (this.DataSource as DataTable).DefaultView.RowFilter = String.Empty;
         }
 
         private void JkLookUpComboBox_Enter(object sender, EventArgs e)
@@ -174,33 +182,28 @@ namespace JkComponents
                 RemoveWaterMark();
         }
 
-        public class JkLookupItem
+        private void JkLookUpComboBox_EnabledChanged(object sender, EventArgs e)
         {
-            private int _Key;
-            private string _DisplayText;
+            if (this.Enabled)
+                FilterDataSource();
+            else
+                RemoveFilterOnDataSource();
+        }
+    }
 
-            public JkLookupItem(int Key, string DisplayText)
-            {
-                _Key = Key;
-                _DisplayText = DisplayText;
-            }
+    public static class JkLookUpComboBoxList
+    {
+        public static List<JkLookUpComboBox> List = new List<JkLookUpComboBox>();
 
-            public int Key
-            {
-                get { return _Key; }
-                set { _Key = value; }
-            }
+        public static void Add(JkLookUpComboBox item)
+        {
+            if (List.Find(l => l.Name == item.Name) == null)
+                List.Add(item);
+        }
 
-            public string DisplayText
-            {
-                get { return _DisplayText; }
-                set { _DisplayText = value; }
-            }
-
-            public override string ToString()
-            {
-                return DisplayText;
-            }
+        public static JkLookUpComboBox FindByName(String name)
+        {
+            return List.Find(l => l.Name == name);
         }
     }
 }

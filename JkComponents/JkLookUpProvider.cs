@@ -13,11 +13,11 @@ namespace JkComponents
         public JkLookUpProvider()
         {
             this.BackColor = Color.Silver;
-            JkLookUpProviders.Add(this);
+            JkLookUpProviderList.Add(this);
         }
     }
 
-    public static class JkLookUpProviders
+    public static class JkLookUpProviderList
     {
         public static List<JkLookUpProvider> List = new List<JkLookUpProvider>();
 
