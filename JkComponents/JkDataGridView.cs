@@ -114,7 +114,10 @@ namespace JkComponents
         public void CreateFooter()
         {
             JkDetailColumn ic = null;
-            int EstimatedWidth = 0, offset = 35, gridWidth = 0;
+            int EstimatedWidth = 0, offset = 1, gridWidth = 0;
+
+            if (this.RowHeadersVisible)
+                offset = 35;
             
             if (VisibleColumnCount() != 0)
                 EstimatedWidth = Convert.ToInt32((this.Width) / VisibleColumnCount()) - 18;

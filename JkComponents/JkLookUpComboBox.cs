@@ -128,7 +128,6 @@ namespace JkComponents
             // JkLookUpComboBox
             // 
             this.DropDown += new System.EventHandler(this.JkLookUpComboBox_DropDown);
-            this.EnabledChanged += new System.EventHandler(this.JkLookUpComboBox_EnabledChanged);
             this.Enter += new System.EventHandler(this.JkLookUpComboBox_Enter);
             this.Leave += new System.EventHandler(this.JkLookUpComboBox_Leave);
             this.ResumeLayout(false);
@@ -150,11 +149,7 @@ namespace JkComponents
                 && DS.Filter != null
                 && !String.IsNullOrWhiteSpace(DS.Filter))
             {
-                Object value = this.SelectedValue;
                 (this.DataSource as DataTable).DefaultView.RowFilter = DS.Filter;
-
-                if (value != null && value != DBNull.Value)
-                    this.SelectedValue = value;
             }
             else
                 RemoveFilterOnDataSource();
@@ -180,14 +175,6 @@ namespace JkComponents
                 AddWaterMark();
             else
                 RemoveWaterMark();
-        }
-
-        private void JkLookUpComboBox_EnabledChanged(object sender, EventArgs e)
-        {
-            if (this.Enabled)
-                FilterDataSource();
-            else
-                RemoveFilterOnDataSource();
         }
     }
 
