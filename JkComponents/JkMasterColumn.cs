@@ -18,5 +18,6 @@ namespace JkComponents
         public bool Required { get; set; }
         [Browsable(false)]
         public Object Value { get; set; }
+        public String LabelName { get; set; }
     }
 }
